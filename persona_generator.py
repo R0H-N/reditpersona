@@ -15,28 +15,40 @@ def load_user_data_from_csv(username):
     if not os.path.exists(path):
         print(f"❌ CSV not found at: {path}")
         return ""
-    
+
     df = pd.read_csv(path)
 
-    # Combine comments and posts for prompt, include ID and link for citation
     content = ""
-    for _, row in df.iterrows():
-        if row['type'] == 'post':
-            content += (
-                f"[Post in r/{row['subreddit']}] (ID: {row['id']})\n"
-                f"Title: {row['title']}\n"
-                f"Body: {row['body']}\n"
-                f"Link: {row['link']}\n\n"
-            )
-        elif row['type'] == 'comment':
-            content += (
-                f"[Comment in r/{row['subreddit']}] (ID: {row['id']})\n"
-                f"{row['body']}\n"
-                f"Link: {row['link']}\n\n"
-            )
-    
-    return content
 
+    for _, row in df.iterrows():
+        # Safely extract fields with fallback
+        post_type = row.get('type', '')
+        subreddit = row.get('subreddit', '')
+        title = row.get('title', '')
+        body = row.get('body', '')
+        post_id = row.get('id', '')
+        link = row.get('link', '')
+
+        if post_type == 'post':
+            content += (
+                f"[Post in r/{subreddit}]\n"
+                f"Title: {title}\n"
+                f"Body: {body}\n\n"
+            )
+        elif post_type == 'comment':
+            content += (
+                f"[Comment in r/{subreddit}]\n"
+                f"{body}\n"
+            )
+            if post_id or link:
+                content += f"(ID: {post_id})"
+                if link:
+                    content += f" | Link: {link}"
+                content += "\n\n"
+            else:
+                content += "\n"
+
+    return content
 
 def generate_persona(content, username_suffix=""):
     if not content.strip():
