@@ -18,13 +18,22 @@ def load_user_data_from_csv(username):
     
     df = pd.read_csv(path)
 
-    # Combine comments and posts for prompt
+    # Combine comments and posts for prompt, include ID and link for citation
     content = ""
     for _, row in df.iterrows():
         if row['type'] == 'post':
-            content += f"[Post in r/{row['subreddit']}]\nTitle: {row['title']}\nBody: {row['body']}\n\n"
+            content += (
+                f"[Post in r/{row['subreddit']}] (ID: {row['id']})\n"
+                f"Title: {row['title']}\n"
+                f"Body: {row['body']}\n"
+                f"Link: {row['link']}\n\n"
+            )
         elif row['type'] == 'comment':
-            content += f"[Comment in r/{row['subreddit']}]\n{row['body']}\n\n"
+            content += (
+                f"[Comment in r/{row['subreddit']}] (ID: {row['id']})\n"
+                f"{row['body']}\n"
+                f"Link: {row['link']}\n\n"
+            )
     
     return content
 

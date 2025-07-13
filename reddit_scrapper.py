@@ -11,7 +11,6 @@ def get_reddit_client():
         client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
         user_agent="RedditPersonaApp by /u/yourusername"
     )
-
 def scrape_user_data(username, limit=100):
     reddit = get_reddit_client()
     user = reddit.redditor(username)
@@ -21,22 +20,26 @@ def scrape_user_data(username, limit=100):
     print(f"🔍 Scraping data for u/{username}...")
 
     # Fetch user posts
-    for post in user.submissions.new(limit=limit):
+    for i, post in enumerate(user.submissions.new(limit=limit)):
         posts.append({
+            'id': f'post_{i}',
             'type': 'post',
             'subreddit': post.subreddit.display_name,
             'title': post.title,
             'body': post.selftext,
-            'score': post.score
+            'score': post.score,
+            'link': f"https://www.reddit.com{post.permalink}"
         })
 
     # Fetch user comments
-    for comment in user.comments.new(limit=limit):
+    for i, comment in enumerate(user.comments.new(limit=limit)):
         comments.append({
+            'id': f'comment_{i}',
             'type': 'comment',
             'subreddit': comment.subreddit.display_name,
             'body': comment.body,
-            'score': comment.score
+            'score': comment.score,
+            'link': f"https://www.reddit.com{comment.permalink}"
         })
 
     df = pd.DataFrame(posts + comments)
